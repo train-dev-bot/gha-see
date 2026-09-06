@@ -14,15 +14,30 @@ cargo run -- samples/
 
 That starts the local UI on the sample workflows. Use `--no-open` if you do not want a browser window. Point `gha-see` at a file or a `.github/workflows` directory for your own repo.
 
-![Job graph with needs and output bindings](docs/images/graph.png)
+![gha-see graph and what-if UI](docs/images/gifs/main.gif)
 
-![Omarchy-inspired theme list](docs/images/themes.png)
+![Click through the graph, selection, and YAML](docs/images/gifs/usage.gif)
 
 **gha-see** reads workflow YAML, maps `needs:`, traces job outputs, and what-if evaluates `if:` against a mock event. It is not a runner and not `act`. It does not invoke GitHub Actions, Docker, or any step from your YAML.
 
 Paste a workflow and **Analyze** without writing disk — that stays in memory until you **Save**.
 
 **Fetch** (optional, explicit) downloads the repos behind remote `uses:` into `~/.cache/gha-see/` so their `action.yml` / workflow YAML can be read. It still does not run them.
+
+## Screens
+
+| Graph | YAML |
+|:--:|:--:|
+| ![Job graph with needs and output bindings](docs/images/graph.png) | ![View and edit YAML without writing disk](docs/images/editor.png) |
+| ![Staging and production environment bands](docs/images/envs.png) | ![Job output bindings on the graph](docs/images/variables.png) |
+
+## Themes
+
+Color palettes inspired by [Omarchy](https://omarchy.org) OS themes (Tokyo Night, Gruvbox, Catppuccin, Everforest, and the rest of that catalog).
+
+| Catppuccin | Gruvbox | Everforest |
+|:--:|:--:|:--:|
+| ![Catppuccin](docs/images/themes/catppuccin.png) | ![Gruvbox](docs/images/themes/gruvbox.png) | ![Everforest](docs/images/themes/everforest.png) |
 
 ## Install
 
@@ -32,10 +47,6 @@ gha-see path/to/.github/workflows
 ```
 
 Or clone this repo and `cargo run -- samples/` for the samples walkthrough.
-
-## Themes
-
-The color palettes are inspired by [Omarchy](https://omarchy.org) OS themes (Tokyo Night, Gruvbox, Catppuccin, Everforest, and the rest of that catalog).
 
 ## Later
 

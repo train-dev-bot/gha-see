@@ -8,7 +8,7 @@ publish = true
 repository = "https://github.com/train-dev-bot/gha-see"
 homepage = "https://github.com/train-dev-bot/gha-see"
 readme = "README.md"
-exclude = ["docs/superpowers/", "docs/gifs/", "dev-env.kdl"]
+exclude = ["docs/superpowers/", "dev-env.kdl"]
 
 [dependencies]
 axum = "0.8"

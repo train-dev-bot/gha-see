@@ -6,3 +6,5 @@ target/
 .superpowers/
 web/node_modules/
 .npm-build-log.txt
+docs/images/gifs/*-1080p.gif
+docs/images/gifs/*.mp4
