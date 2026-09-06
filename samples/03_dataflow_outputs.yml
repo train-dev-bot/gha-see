@@ -1,0 +1,26 @@
+name: Dataflow outputs
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.package.outputs.name }}
+    steps:
+      - name: Package application
+        id: package
+        run: echo "name=web-bundle" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish named artifact
+        run: echo "Publishing ${{ needs.build.outputs.artifact_name }}"
+
+  announce:
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce release
+        run: echo "${{ needs.build.outputs.artifact_name }} is ready"

@@ -1,0 +1,14 @@
+name: Greeting action
+description: Exercises local composite resolution
+inputs:
+  greeting:
+    default: hi
+runs:
+  using: composite
+  steps:
+    - name: Say hello
+      shell: bash
+      run: echo "${{ inputs.greeting }}"
+    - name: Finish
+      shell: bash
+      run: echo done

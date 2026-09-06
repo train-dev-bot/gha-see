@@ -1,0 +1,5 @@
+name: Cycle A
+on: workflow_call
+jobs:
+  call-b:
+    uses: ./.github/workflows/cycle-b.yml

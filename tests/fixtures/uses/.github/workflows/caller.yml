@@ -1,0 +1,20 @@
+name: Uses caller
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/greet
+        with:
+          greeting: hello
+      - uses: actions/checkout@v4
+  call:
+    needs: build
+    uses: ./.github/workflows/reusable.yml
+    with:
+      target: staging
+  after:
+    needs: call
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo done

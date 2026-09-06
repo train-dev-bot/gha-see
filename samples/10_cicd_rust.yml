@@ -1,0 +1,427 @@
+name: CI/CD Showcase (Rust)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target CloudFormation environment
+        required: true
+        type: choice
+        options: [staging, production]
+        default: staging
+      skip_dast:
+        description: Skip dynamic application security testing
+        required: false
+        type: boolean
+        default: false
+      force_rollback:
+        description: Force CloudFormation rollback path
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: cicd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+  attestations: write
+  pull-requests: read
+  security-events: write
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CARGO_TERM_COLOR: always
+  AWS_REGION: us-east-1
+  CFN_STACK_PREFIX: gha-see-demo-rust
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      git_sha: ${{ steps.meta.outputs.git_sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve release metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION="0.1.0+${GITHUB_SHA::8}"
+          if [[ -f Cargo.toml ]]; then
+            CARGO_VER=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+            [[ -n "${CARGO_VER}" ]] && VERSION="${CARGO_VER}+${GITHUB_SHA::8}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "git_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test
+    needs: prepare
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: app_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d app_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://ci:ci@localhost:5432/app_test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo registry and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Wait for Postgres
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U ci && break
+            sleep 1
+          done
+      - name: Run workspace tests
+        run: cargo test --workspace --all-features -- --nocapture
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-ubuntu
+          path: target/coverage/
+          if-no-files-found: ignore
+
+  sast:
+    name: SAST
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Clippy (deny warnings)
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Dependency advisory audit
+        run: |
+          set -euo pipefail
+          cargo install cargo-audit --locked
+          cargo audit --deny warnings
+
+  lint:
+    name: Lint
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: rustfmt check
+        run: cargo fmt --all -- --check
+
+  build:
+    name: Build
+    needs: [test, sast, lint]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.artifact.outputs.version }}
+      artifact_name: ${{ steps.artifact.outputs.artifact_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build release binary
+        run: cargo build --release --locked
+      - name: Generate CycloneDX SBOM
+        run: |
+          set -euo pipefail
+          cargo install cargo-cyclonedx --locked
+          cargo cyclonedx --format json --output-path sbom.cdx.json
+      - name: Stage artifact bundle
+        id: artifact
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.prepare.outputs.version }}"
+          NAME="app-rust-${VERSION}"
+          mkdir -p dist
+          cp target/release/* dist/ 2>/dev/null || cp -r target/release dist/bin
+          cp sbom.cdx.json dist/
+          tar -czf "${NAME}.tar.gz" -C dist .
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=${NAME}.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-release-bundle
+          path: ${{ steps.artifact.outputs.artifact_name }}
+
+  release:
+    name: GitHub Release
+    needs: [prepare, build]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-release-bundle
+      - name: Create draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: Release ${{ needs.build.outputs.version }}
+          draft: true
+          files: ${{ needs.build.outputs.artifact_name }}
+          body: |
+            Automated draft release for `${{ needs.prepare.outputs.git_sha }}`.
+            Artifact: `${{ needs.build.outputs.artifact_name }}`.
+
+  attest:
+    name: Attest
+    needs: [build, release]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-release-bundle
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ needs.build.outputs.artifact_name }}
+
+  cfn-staging:
+    name: CFN Staging
+    needs: [build, release, attest]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      stack_url: ${{ steps.deploy.outputs.stack_url }}
+      stack_name: ${{ steps.deploy.outputs.stack_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/gha-cfn-deploy
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Package and deploy staging stack
+        id: deploy
+        run: |
+          set -euo pipefail
+          STACK="${CFN_STACK_PREFIX}-staging"
+          ARTIFACT_URI="s3://demo-artifacts/${{ needs.build.outputs.artifact_name }}"
+          aws s3 cp "${{ needs.build.outputs.artifact_name }}" "${ARTIFACT_URI}" || \
+            aws s3api put-object --bucket demo-artifacts --key "${{ needs.build.outputs.artifact_name }}" --body /dev/null
+          aws cloudformation package \
+            --template-file infra/cloudformation/app.yml \
+            --s3-bucket demo-cfn-artifacts \
+            --output-template-file packaged-staging.yml
+          aws cloudformation deploy \
+            --stack-name "${STACK}" \
+            --template-file packaged-staging.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              ArtifactUri="${ARTIFACT_URI}" \
+              Version="${{ needs.build.outputs.version }}" \
+            --no-fail-on-empty-changeset
+          URL=$(aws cloudformation describe-stacks --stack-name "${STACK}" \
+            --query "Stacks[0].Outputs[?OutputKey=='ServiceUrl'].OutputValue" --output text)
+          echo "stack_name=${STACK}" >> "$GITHUB_OUTPUT"
+          echo "stack_url=${URL}" >> "$GITHUB_OUTPUT"
+
+  canary:
+    name: Canary
+    needs: [cfn-staging, build]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: canary
+    outputs:
+      change_set_name: ${{ steps.changeset.outputs.change_set_name }}
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/gha-cfn-deploy
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Create canary change set
+        id: changeset
+        run: |
+          set -euo pipefail
+          STACK="${CFN_STACK_PREFIX}-prod"
+          CS="canary-${{ needs.build.outputs.version }}-${GITHUB_RUN_ID}"
+          aws cloudformation create-change-set \
+            --stack-name "${STACK}" \
+            --change-set-name "${CS}" \
+            --template-body file://packaged-staging.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameters \
+              ParameterKey=ArtifactUri,ParameterValue="s3://demo-artifacts/${{ needs.build.outputs.artifact_name }}" \
+              ParameterKey=Version,ParameterValue="${{ needs.build.outputs.version }}" \
+              ParameterKey=CanaryWeight,ParameterValue=10 \
+            --description "Canary 10% traffic for ${{ needs.build.outputs.version }}"
+          aws cloudformation wait change-set-create-complete \
+            --stack-name "${STACK}" --change-set-name "${CS}"
+          aws cloudformation describe-change-set \
+            --stack-name "${STACK}" --change-set-name "${CS}"
+          echo "change_set_name=${CS}" >> "$GITHUB_OUTPUT"
+
+  verify:
+    name: Verify
+    needs: [canary, cfn-staging, build]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test canary endpoint
+        run: |
+          set -euo pipefail
+          BASE="${{ needs.cfn-staging.outputs.stack_url }}"
+          curl -fsS --retry 5 --retry-delay 2 "${BASE}/healthz"
+          curl -fsS --retry 3 "${BASE}/api/v1/version" | grep -F "${{ needs.build.outputs.version }}" || \
+            curl -fsS "${BASE}/api/v1/version"
+
+  dast:
+    name: DAST
+    needs: [cfn-staging, canary]
+    if: |
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) &&
+      (github.event_name != 'workflow_dispatch' || inputs.skip_dast != true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run dynamic security scan
+        run: |
+          set -euo pipefail
+          TARGET="${{ needs.cfn-staging.outputs.stack_url }}"
+          docker run --rm -t owasp/zap2docker-stable zap-baseline.py -t "${TARGET}" -m 5 || \
+            npx --yes @zaproxy/cli baseline "${TARGET}"
+
+  promote:
+    name: Promote
+    needs: [canary, verify, dast, build]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) &&
+      needs.canary.result == 'success' &&
+      needs.verify.result == 'success' &&
+      (needs.dast.result == 'success' || needs.dast.result == 'skipped') &&
+      (github.event_name != 'workflow_dispatch' || inputs.force_rollback != true) &&
+      (github.event_name != 'workflow_dispatch' || inputs.environment == 'production' || inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/gha-cfn-deploy
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Execute canary change set (full promote)
+        run: |
+          set -euo pipefail
+          STACK="${CFN_STACK_PREFIX}-prod"
+          CS="${{ needs.canary.outputs.change_set_name }}"
+          aws cloudformation execute-change-set \
+            --stack-name "${STACK}" \
+            --change-set-name "${CS}"
+          aws cloudformation wait stack-update-complete --stack-name "${STACK}"
+          aws cloudformation update-termination-protection \
+            --stack-name "${STACK}" --enable-termination-protection
+
+  rollback:
+    name: Rollback
+    needs: [canary, verify, cfn-staging, build]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) &&
+      (
+        (github.event_name == 'workflow_dispatch' && inputs.force_rollback == true) ||
+        needs.canary.result == 'failure' ||
+        needs.verify.result == 'failure'
+      )
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/gha-cfn-deploy
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Redeploy previous CloudFormation template
+        run: |
+          set -euo pipefail
+          STACK="${CFN_STACK_PREFIX}-prod"
+          PREV="s3://demo-cfn-artifacts/${STACK}/previous.yml"
+          aws s3 cp "${PREV}" previous.yml
+          aws cloudformation deploy \
+            --stack-name "${STACK}" \
+            --template-file previous.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+          aws cloudformation continue-update-rollback --stack-name "${STACK}" || true
+
+  notify:
+    name: Notify
+    needs: [promote, rollback, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post pipeline status
+        run: |
+          set -euo pipefail
+          STATUS="success"
+          [[ "${{ needs.promote.result }}" == "failure" || "${{ needs.rollback.result }}" == "failure" ]] && STATUS="failure"
+          [[ "${{ needs.rollback.result }}" == "success" && "${{ needs.promote.result }}" != "success" ]] && STATUS="rolled_back"
+          PAYLOAD=$(printf '{"workflow":"%s","ref":"%s","version":"%s","status":"%s","run":"%s"}' \
+            "${{ github.workflow }}" \
+            "${{ github.ref }}" \
+            "${{ needs.build.outputs.version }}" \
+            "${STATUS}" \
+            "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}")
+          WEBHOOK="${{ vars.NOTIFY_WEBHOOK_URL }}"
+          if [[ -n "${WEBHOOK}" ]]; then
+            curl -fsS -X POST -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK}"
+          else
+            printf 'notify: %s\n' "${PAYLOAD}"
+            gh api --method POST -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/dispatches" \
+              -f event_type='pipeline-status' -f client_payload="${PAYLOAD}" || true
+          fi

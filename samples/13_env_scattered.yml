@@ -1,0 +1,56 @@
+name: Environment scattered same name
+
+# Same environment name on jobs that are not neighbors in the DAG layout.
+# Approach B should NOT draw one hull through intervening jobs — only
+# contiguous clusters (≥2 touching) get a band; isolated env jobs keep the badge.
+
+on:
+  push:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    environment: shared-tools
+    steps:
+      - run: echo "prepare tooling"
+
+  lint:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo lint
+
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo test
+
+  package:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo package
+
+  # Same env as prepare, but several columns away — not contiguous with prepare.
+  publish-docs:
+    needs: package
+    runs-on: ubuntu-latest
+    environment: shared-tools
+    steps:
+      - run: echo "publish docs with shared tools"
+
+  # Contiguous pair later in the graph — should get a band.
+  release-notes:
+    needs: package
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - run: echo notes
+
+  github-release:
+    needs: release-notes
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - run: echo "create release"

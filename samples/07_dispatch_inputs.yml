@@ -1,0 +1,35 @@
+name: Dispatch input context
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        type: choice
+        options: [staging, production]
+        default: staging
+      dry_run:
+        description: Preview without deploying
+        required: true
+        type: boolean
+        default: true
+      release_name:
+        description: Optional release label
+        required: false
+        type: string
+        default: demo
+
+jobs:
+  preview:
+    if: inputs.dry_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preview selection
+        run: echo "${{ inputs.release_name }} targets ${{ inputs.environment }}"
+
+  deploy:
+    if: inputs.environment == 'production' && inputs.dry_run == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy release
+        run: echo "Deploying ${{ inputs.release_name }}"

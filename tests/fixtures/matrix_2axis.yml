@@ -1,0 +1,12 @@
+name: Matrix2Axis
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+        os: [ubuntu-latest, windows-latest]
+    if: matrix.node == '18'
+    steps:
+      - run: echo ${{ matrix.node }} ${{ matrix.os }}

@@ -1,0 +1,14 @@
+name: MatrixInclude
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fruit: [apple, pear]
+        include:
+          - color: green
+          - fruit: banana
+            color: yellow
+    steps:
+      - run: echo ${{ matrix.fruit }} ${{ matrix.color }}

@@ -1,0 +1,18 @@
+name: Remote uses fetch
+on: push
+
+jobs:
+  node-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Show runtime
+        run: node --version

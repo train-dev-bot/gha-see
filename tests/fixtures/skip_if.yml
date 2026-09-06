@@ -1,0 +1,11 @@
+name: Skip
+on: [push, pull_request]
+jobs:
+  pr-only:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps: [{run: echo pr}]
+  always-push:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps: [{run: echo push}]

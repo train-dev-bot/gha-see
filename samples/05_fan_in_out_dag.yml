@@ -1,0 +1,58 @@
+name: Fan-out and fan-in DAG
+on: push
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare workspace
+        run: echo prepare
+
+  lint:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint
+        run: cargo clippy
+
+  unit-linux:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Linux unit tests
+        run: cargo test
+
+  unit-windows:
+    needs: prepare
+    runs-on: windows-latest
+    steps:
+      - name: Windows unit tests
+        run: cargo test
+
+  integration:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Integration tests
+        run: cargo test --test integration
+
+  package:
+    needs: [lint, unit-linux, unit-windows, integration]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Package
+        run: cargo package
+
+  security-scan:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan package
+        run: echo scan
+
+  deploy:
+    needs: [package, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: echo deploy

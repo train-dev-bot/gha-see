@@ -1,0 +1,55 @@
+name: Environment staging and production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "build artifact"
+
+  deploy-staging-api:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - run: echo "deploy api → staging"
+
+  deploy-staging-web:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - run: echo "deploy web → staging"
+
+  smoke-staging:
+    needs: [deploy-staging-api, deploy-staging-web]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - run: echo "smoke staging"
+
+  deploy-prod-api:
+    needs: smoke-staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "deploy api → production"
+
+  deploy-prod-web:
+    needs: smoke-staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "deploy web → production"
+
+  verify-prod:
+    needs: [deploy-prod-api, deploy-prod-web]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "verify production"

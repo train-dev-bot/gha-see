@@ -1,0 +1,15 @@
+name: MatrixNeeds
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - run: echo build ${{ matrix.node }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - run: echo deploy

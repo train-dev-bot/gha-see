@@ -1,0 +1,25 @@
+name: Concurrency and services
+on: push
+
+concurrency:
+  group: database-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: postgres-integration
+      cancel-in-progress: false
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: example
+        ports:
+          - 5432:5432
+    steps:
+      - name: Wait for database
+        run: echo "PostgreSQL is available on port 5432"
+      - name: Run integration tests
+        run: cargo test --test integration

@@ -1,0 +1,11 @@
+name: Cycle
+on: push
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    needs: [b]
+    steps: [{run: echo a}]
+  b:
+    runs-on: ubuntu-latest
+    needs: [a]
+    steps: [{run: echo b}]

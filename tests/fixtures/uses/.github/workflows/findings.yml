@@ -1,0 +1,11 @@
+name: Uses findings
+on: push
+jobs:
+  remote:
+    uses: octo-org/ci/.github/workflows/build.yml@main
+  missing-workflow:
+    uses: ./.github/workflows/not-here.yml
+  missing-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/not-here

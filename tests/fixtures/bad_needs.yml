@@ -1,0 +1,7 @@
+name: Bad
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    needs: [does_not_exist]
+    steps: [{run: echo x}]

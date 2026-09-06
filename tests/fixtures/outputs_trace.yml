@@ -1,0 +1,15 @@
+name: Trace
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.x.outputs.id }}
+    steps:
+      - id: x
+        run: echo "id=1" >> $GITHUB_OUTPUT
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - run: echo ${{ needs.build.outputs.artifact-id }}

@@ -1,0 +1,15 @@
+name: Local reusable workflow
+on:
+  workflow_call:
+    inputs:
+      suite:
+        description: Test suite to run
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run requested suite
+        run: echo "Running ${{ inputs.suite }} tests"

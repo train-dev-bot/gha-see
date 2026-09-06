@@ -1,0 +1,19 @@
+name: Matrix include and exclude
+on: pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu, windows]
+        node: [18, 20]
+        exclude:
+          - os: windows
+            node: 18
+        include:
+          - os: ubuntu
+            node: 22
+    steps:
+      - name: Show matrix values
+        run: echo "${{ matrix.os }} / Node ${{ matrix.node }}"

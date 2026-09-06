@@ -1,0 +1,8 @@
+.worktrees
+/target/
+target/
+**/*.rs.bk
+.gha-see-corpus/
+.superpowers/
+web/node_modules/
+.npm-build-log.txt

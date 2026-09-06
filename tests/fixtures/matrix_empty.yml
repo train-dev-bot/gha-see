@@ -1,0 +1,12 @@
+name: MatrixEmpty
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18]
+        exclude:
+          - node: 18
+    steps:
+      - run: echo hi

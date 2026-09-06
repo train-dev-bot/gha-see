@@ -1,0 +1,420 @@
+/* Omarchy-mapped themes with contrast-safe text/panel */
+
+/* catppuccin (dark) */
+[data-theme="catppuccin"] {
+  --bg: #1e1e2e;
+  --panel: #313244;
+  --surface: #161622;
+  --border: #45475a;
+  --text: #cdd6f4;
+  --muted: #bac2de;
+  --cyan: #94e2d5;
+  --magenta: #f5c2e7;
+  --will-run: #a6e3a1;
+  --skipped: #f9e2af;
+  --unknown: #bac2de;
+  --deferred: #89b4fa;
+  --error: #f38ba8;
+  --warning: #f9e2af;
+  --info: #89b4fa;
+}
+
+/* catppuccin-latte (light) */
+[data-theme="catppuccin-latte"] {
+  --bg: #eff1f5;
+  --panel: #dce0e8;
+  --surface: #d7d8dc;
+  --border: #ccd0da;
+  --text: #4c4f69;
+  --muted: #5c5f77;
+  --cyan: #179299;
+  --magenta: #ea76cb;
+  --will-run: #40a02b;
+  --skipped: #df8e1d;
+  --unknown: #5c5f77;
+  --deferred: #1e66f5;
+  --error: #d20f39;
+  --warning: #df8e1d;
+  --info: #1e66f5;
+}
+
+/* ethereal (dark) */
+[data-theme="ethereal"] {
+  --bg: #060B1E;
+  --panel: #131a3a;
+  --surface: #040816;
+  --border: #252e56;
+  --text: #ffcead;
+  --muted: #c9b8a6;
+  --cyan: #a3bfd1;
+  --magenta: #c89dc1;
+  --will-run: #92a593;
+  --skipped: #E9BB4F;
+  --unknown: #c9b8a6;
+  --deferred: #7d82d9;
+  --error: #ED5B5A;
+  --warning: #E9BB4F;
+  --info: #7d82d9;
+}
+
+/* everforest (dark) */
+[data-theme="everforest"] {
+  --bg: #2d353b;
+  --panel: #343f44;
+  --surface: #21272c;
+  --border: #3d484d;
+  --text: #d3c6aa;
+  --muted: #9da9a0;
+  --cyan: #83c092;
+  --magenta: #d699b6;
+  --will-run: #a7c080;
+  --skipped: #dbbc7f;
+  --unknown: #9da9a0;
+  --deferred: #7fbbb3;
+  --error: #e67e80;
+  --warning: #dbbc7f;
+  --info: #7fbbb3;
+}
+
+/* flexoki-light (light) */
+[data-theme="flexoki-light"] {
+  --bg: #FFFCF0;
+  --panel: #E6E4D9;
+  --surface: #e5e2d8;
+  --border: #CECDC3;
+  --text: #100F0F;
+  --muted: #403E3C;
+  --cyan: #3AA99F;
+  --magenta: #CE5D97;
+  --will-run: #879A39;
+  --skipped: #D0A215;
+  --unknown: #403E3C;
+  --deferred: #205EA6;
+  --error: #D14D41;
+  --warning: #D0A215;
+  --info: #205EA6;
+}
+
+/* gruvbox (dark) */
+[data-theme="gruvbox"] {
+  --bg: #282828;
+  --panel: #3c3836;
+  --surface: #1e1e1e;
+  --border: #504945;
+  --text: #d4be98;
+  --muted: #bdae93;
+  --cyan: #89b482;
+  --magenta: #d3869b;
+  --will-run: #a9b665;
+  --skipped: #d8a657;
+  --unknown: #bdae93;
+  --deferred: #7daea3;
+  --error: #ea6962;
+  --warning: #d8a657;
+  --info: #7daea3;
+}
+
+/* hackerman (dark) */
+[data-theme="hackerman"] {
+  --bg: #0B0C16;
+  --panel: #151828;
+  --surface: #080910;
+  --border: #1f253a;
+  --text: #ddf7ff;
+  --muted: #b5c5db;
+  --cyan: #7cf8f7;
+  --magenta: #86a7df;
+  --will-run: #4fe88f;
+  --skipped: #50f7d4;
+  --unknown: #b5c5db;
+  --deferred: #829dd4;
+  --error: #50f872;
+  --warning: #50f7d4;
+  --info: #829dd4;
+}
+
+/* kanagawa (dark) */
+[data-theme="kanagawa"] {
+  --bg: #1f1f28;
+  --panel: #223249;
+  --surface: #17171e;
+  --border: #363646;
+  --text: #dcd7ba;
+  --muted: #c8c093;
+  --cyan: #6a9589;
+  --magenta: #957fb8;
+  --will-run: #76946a;
+  --skipped: #c0a36e;
+  --unknown: #c8c093;
+  --deferred: #7e9cd8;
+  --error: #c34043;
+  --warning: #c0a36e;
+  --info: #7e9cd8;
+}
+
+/* last-horizon (dark) */
+[data-theme="last-horizon"] {
+  --bg: #0c0b0c;
+  --panel: #0c0b0c;
+  --surface: #090809;
+  --border: #584e51;
+  --text: #e2dddc;
+  --muted: #cfd3cd;
+  --cyan: #a5a0b6;
+  --magenta: #c4d8e2;
+  --will-run: #87a9b0;
+  --skipped: #6B5E73;
+  --unknown: #cfd3cd;
+  --deferred: #b59790;
+  --error: #c38b7b;
+  --warning: #6B5E73;
+  --info: #b59790;
+}
+
+/* lumon (dark) */
+[data-theme="lumon"] {
+  --bg: #16242d;
+  --panel: #1b2d40;
+  --surface: #101b21;
+  --border: #243d56;
+  --text: #f2fcff;
+  --muted: #8aa3b5;
+  --cyan: #b4e4f6;
+  --magenta: #8bc9eb;
+  --will-run: #5e95bc;
+  --skipped: #6fa4c9;
+  --unknown: #8aa3b5;
+  --deferred: #6fb8e3;
+  --error: #4d86b0;
+  --warning: #6fa4c9;
+  --info: #6fb8e3;
+}
+
+/* lupine (light) */
+[data-theme="lupine"] {
+  --bg: #fafafa;
+  --panel: #f5f5f5;
+  --surface: #dedede;
+  --border: #d0d0d0;
+  --text: #000000;
+  --muted: #424242;
+  --cyan: #0c67de;
+  --magenta: #8a4ad7;
+  --will-run: #4a2fd0;
+  --skipped: #026fde;
+  --unknown: #424242;
+  --deferred: #3264eb;
+  --error: #c900c4;
+  --warning: #026fde;
+  --info: #3264eb;
+}
+
+/* matte-black (dark) */
+[data-theme="matte-black"] {
+  --bg: #121212;
+  --panel: #1e1e1e;
+  --surface: #0d0d0d;
+  --border: #2a2a2a;
+  --text: #bebebe;
+  --muted: #8a8a8d;
+  --cyan: #bebebe;
+  --magenta: #D35F5F;
+  --will-run: #FFC107;
+  --skipped: #b91c1c;
+  --unknown: #8a8a8d;
+  --deferred: #e68e0d;
+  --error: #D35F5F;
+  --warning: #b91c1c;
+  --info: #e68e0d;
+}
+
+/* miasma (dark) */
+[data-theme="miasma"] {
+  --bg: #222222;
+  --panel: #2c2c2c;
+  --surface: #191919;
+  --border: #383838;
+  --text: #c2c2b0;
+  --muted: #8a8a7e;
+  --cyan: #c9a554;
+  --magenta: #bb7744;
+  --will-run: #5f875f;
+  --skipped: #b36d43;
+  --unknown: #8a8a7e;
+  --deferred: #78824b;
+  --error: #685742;
+  --warning: #b36d43;
+  --info: #78824b;
+}
+
+/* nord (dark) */
+[data-theme="nord"] {
+  --bg: #2e3440;
+  --panel: #3b4252;
+  --surface: #222730;
+  --border: #434c5e;
+  --text: #d8dee9;
+  --muted: #adb5c4;
+  --cyan: #88c0d0;
+  --magenta: #b48ead;
+  --will-run: #a3be8c;
+  --skipped: #ebcb8b;
+  --unknown: #adb5c4;
+  --deferred: #81a1c1;
+  --error: #bf616a;
+  --warning: #ebcb8b;
+  --info: #81a1c1;
+}
+
+/* osaka-jade (dark) */
+[data-theme="osaka-jade"] {
+  --bg: #111c18;
+  --panel: #23372B;
+  --surface: #0c1512;
+  --border: #32473B;
+  --text: #F7E8B2;
+  --muted: #D6D5BC;
+  --cyan: #2DD5B7;
+  --magenta: #D2689C;
+  --will-run: #549e6a;
+  --skipped: #459451;
+  --unknown: #D6D5BC;
+  --deferred: #509475;
+  --error: #FF5345;
+  --warning: #459451;
+  --info: #509475;
+}
+
+/* retro-82 (dark) */
+[data-theme="retro-82"] {
+  --bg: #05182e;
+  --panel: #0a2540;
+  --surface: #031222;
+  --border: #134e5a;
+  --text: #f6dcac;
+  --muted: #a7c9c6;
+  --cyan: #8cbfb8;
+  --magenta: #3f8f8a;
+  --will-run: #028391;
+  --skipped: #e97b3c;
+  --unknown: #a7c9c6;
+  --deferred: #3f8f8a;
+  --error: #f85525;
+  --warning: #e97b3c;
+  --info: #3f8f8a;
+}
+
+/* ristretto (dark) */
+[data-theme="ristretto"] {
+  --bg: #2c2525;
+  --panel: #3d2f2a;
+  --surface: #211b1b;
+  --border: #403e41;
+  --text: #e6d9db;
+  --muted: #c3b7b8;
+  --cyan: #85dacc;
+  --magenta: #a8a9eb;
+  --will-run: #adda78;
+  --skipped: #f9cc6c;
+  --unknown: #c3b7b8;
+  --deferred: #f38d70;
+  --error: #fd6883;
+  --warning: #f9cc6c;
+  --info: #f38d70;
+}
+
+/* rose-pine (light) */
+[data-theme="rose-pine"] {
+  --bg: #faf4ed;
+  --panel: #f2e9e1;
+  --surface: #e1dbd5;
+  --border: #dfdad9;
+  --text: #575279;
+  --muted: #6e6a86;
+  --cyan: #d7827e;
+  --magenta: #907aa9;
+  --will-run: #286983;
+  --skipped: #ea9d34;
+  --unknown: #6e6a86;
+  --deferred: #56949f;
+  --error: #b4637a;
+  --warning: #ea9d34;
+  --info: #56949f;
+}
+
+/* solitude (dark) — muted must stay dimmer than body text */
+[data-theme="solitude"] {
+  --bg: #101315;
+  --panel: #161a1c;
+  --surface: #0c0e10;
+  --border: #343d41;
+  --text: #d5dde0;
+  --muted: #8b9599;
+  --cyan: #7eb8c9;
+  --magenta: #c4a4c8;
+  --will-run: #9dba8c;
+  --skipped: #d4c07a;
+  --unknown: #8b9599;
+  --deferred: #7f9bb0;
+  --error: #d07a7a;
+  --warning: #d4c07a;
+  --info: #7f9bb0;
+}
+
+/* tokyo-night (dark) */
+[data-theme="tokyo-night"] {
+  --bg: #1a1b26;
+  --panel: #24283b;
+  --surface: #13141c;
+  --border: #292e42;
+  --text: #c0caf5;
+  --muted: #b4bee6;
+  --cyan: #449dab;
+  --magenta: #ad8ee6;
+  --will-run: #9ece6a;
+  --skipped: #e0af68;
+  --unknown: #b4bee6;
+  --deferred: #7aa2f7;
+  --error: #f7768e;
+  --warning: #e0af68;
+  --info: #7aa2f7;
+}
+
+/* vantablack (dark) */
+[data-theme="vantablack"] {
+  --bg: #000000;
+  --panel: #1a1a1a;
+  --surface: #090909;
+  --border: #2a2a2a;
+  --text: #f2f2f2;
+  --muted: #9a9a9a;
+  --cyan: #8ec8c8;
+  --magenta: #d08ab0;
+  --will-run: #8fbf8f;
+  --skipped: #d4c07a;
+  --unknown: #9a9a9a;
+  --deferred: #8aa0d4;
+  --error: #e08080;
+  --warning: #d4c07a;
+  --info: #8aa0d4;
+}
+
+/* white (light) — keep semantic hues so graph labels stay readable */
+[data-theme="white"] {
+  --bg: #ffffff;
+  --panel: #f4f4f5;
+  --surface: #ececee;
+  --border: #c8c8ce;
+  --text: #1a1a1f;
+  --muted: #5c5c66;
+  --cyan: #0b7285;
+  --magenta: #9c36b5;
+  --will-run: #2b8a3e;
+  --skipped: #e67700;
+  --unknown: #5c5c66;
+  --deferred: #1c7ed6;
+  --error: #c92a2a;
+  --warning: #e67700;
+  --info: #1c7ed6;
+}
+

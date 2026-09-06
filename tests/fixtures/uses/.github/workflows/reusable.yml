@@ -1,0 +1,18 @@
+name: Reusable deployment
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo prepare
+  deploy:
+    needs: prepare
+    if: inputs.target == 'staging'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo deploy

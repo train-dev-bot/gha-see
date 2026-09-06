@@ -1,0 +1,23 @@
+name: Conditional skip what-if
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  push-only:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push checks
+        run: echo "Runs for push"
+      - name: Dispatch-only detail
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Skipped for the default push context"
+
+  pull-request-only:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review checks
+        run: echo "Runs for pull requests"
