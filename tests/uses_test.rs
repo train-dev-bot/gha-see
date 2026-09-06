@@ -126,7 +126,8 @@ fn reports_reusable_workflow_call_cycles() {
 
 #[test]
 fn expands_cached_remote_composites_and_reusable_workflows_recursively() {
-    let root = std::env::temp_dir().join(format!("gha_see_remote_uses_test_{}", std::process::id()));
+    let root =
+        std::env::temp_dir().join(format!("gha_see_remote_uses_test_{}", std::process::id()));
     let cache = root.join("cache");
     let workflow_file = root.join(".github/workflows/main.yml");
     std::fs::create_dir_all(workflow_file.parent().unwrap()).unwrap();

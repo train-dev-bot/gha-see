@@ -1,9 +1,9 @@
 use std::io::Write;
 use std::path::Path;
 
-use gha_see::fetch::{ensure_cached_with, FetchOutcome, RemoteRef};
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use gha_see::fetch::{ensure_cached_with, FetchOutcome, RemoteRef};
 
 #[test]
 fn parses_remote_action_and_cache_layout() {
@@ -56,7 +56,10 @@ fn downloads_archive_once_and_reuses_complete_cache() {
 
     let first = ensure_cached_with(&remote, &cache, |_| Ok::<_, String>(archive)).unwrap();
     assert!(matches!(first, FetchOutcome::Fetched { .. }));
-    assert!(remote.cache_path(&cache).join(".gha-see-complete").is_file());
+    assert!(remote
+        .cache_path(&cache)
+        .join(".gha-see-complete")
+        .is_file());
     assert!(remote.target_path(&cache).join("action.yml").is_file());
 
     let second = ensure_cached_with(&remote, &cache, |_| -> Result<Vec<u8>, String> {
